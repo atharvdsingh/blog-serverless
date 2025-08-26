@@ -2,7 +2,8 @@ import { Hono } from 'hono'
 import { PrismaClient } from '@prisma/client/edge'
 import { withAccelerate } from '@prisma/extension-accelerate'
 import { env } from 'hono/adapter'
- import {  sign ,decode} from 'hono/jwt'
+ import {  decode, sign ,verify} from 'hono/jwt'
+import { PrismaClientExtends } from '@prisma/client/extension'
 
 
 
@@ -14,14 +15,26 @@ const app = new Hono <{ Bindings:{
 
 
 app.use('/api/v1/user/*',async (c,next)=>{
-  const body=await c.req.json()
-  if(!body.token){
+  const token:string= c.req.header("Authorization") || ""
+  if(token){
     return c.json({"message":"does not containet toeken"})
   }
+  
 
-
-  next()
-
+  try {
+    type decodedToken_={
+      id:string
+    }
+    const respons=await verify(token,c.env.JWT_SECRET) as decodedToken_
+    if(!respons.id){
+      return c.json("unAuthorize") 
+    }
+  
+    next()
+  
+  } catch (error) {
+    
+  }
 })
 
 app.post('/api/v1/user/signup',async (c)=>{
