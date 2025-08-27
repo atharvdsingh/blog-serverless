@@ -4,6 +4,8 @@ import { withAccelerate } from "@prisma/extension-accelerate";
 import { env } from "hono/adapter";
 import { decode, sign, verify } from "hono/jwt";
 import { PrismaClientExtends } from "@prisma/client/extension";
+import { singinValidation} from "@atharvdevsingh/serverless-blog-zodvalidation";
+
 
 export const userRouter = new Hono<{
   Bindings: {
@@ -19,11 +21,18 @@ userRouter.post("/signup", async (c) => {
 
   const body = await c.req.json();
 
+  const {success}=singinValidation.safeParse(body)
+  if(success){
+    c.status(400)
+    return c.json({message:"Valid inputs is not present"})
+  }
+
   const data = await prisma.users.findUnique({
     where: {
       email: body.email,
     },
   });
+  
   if (data) {
     return c.json({ message: "user already exist" });
   }
@@ -49,7 +58,11 @@ userRouter.post("/singin", async (c) => {
   }).$extends(withAccelerate());
 
   const body = await c.req.json();
-
+  const {success} = singinValidation.safeParse(body)
+  if(!success){
+    c.status(411)
+    return c.json({message:"Wrong type credentials"})
+  }
   const user = await prisma.users.findUnique({
     where: {
       email: body.email,

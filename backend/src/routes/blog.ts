@@ -45,6 +45,9 @@ blogRouter.use("/*", async (c, next) => {
 //   author users @relation(fields: [authorId] ,references: [id])
 //   authorId String
 
+
+
+// ? CREATE BLOG ROUTE
 blogRouter.post("/blog", async (c) => {
   const prisma = new PrismaClient({
     datasourceUrl: c.env.DATABASE_URL,
@@ -68,6 +71,8 @@ blogRouter.post("/blog", async (c) => {
   return c.json({ message: "blog is created", id: post?.id });
 });
 
+
+// ? UPDATE BLOG ROUTE
 blogRouter.put("/blog", async (c) => {
   const prisma = new PrismaClient({
     datasourceUrl: c.env.DATABASE_URL,
@@ -107,6 +112,8 @@ blogRouter.get("/bulk", async (c) => {
     return c.json({ message: error });
   }
 });
+
+//? SPECIFI BLOG 
 
 
 blogRouter.get("/blog/:id", async (c) => {
