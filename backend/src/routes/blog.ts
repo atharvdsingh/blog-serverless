@@ -4,6 +4,7 @@ import { withAccelerate } from "@prisma/extension-accelerate";
 import { env } from "hono/adapter";
 import { decode, sign, verify } from "hono/jwt";
 import { PrismaClientExtends } from "@prisma/client/extension";
+import { createBlogValidation, CreateBlogValidation,updateBlogValidation } from "@atharvdevsingh/serverless-blog-zodvalidation";
 
 export const blogRouter = new Hono<{
   Bindings: {
@@ -53,7 +54,15 @@ blogRouter.post("/blog", async (c) => {
     datasourceUrl: c.env.DATABASE_URL,
   }).$extends(withAccelerate());
 
+
   const body = await c.req.json();
+
+  const {success}=createBlogValidation.safeParse(body)
+  if(!success){
+    c.status(411)
+    return c.json({message:"type is wrong"})
+  }
+
   const id = c.get("auth");
   const post = await prisma.post.create({
     data: {
@@ -79,6 +88,12 @@ blogRouter.put("/blog", async (c) => {
   }).$extends(withAccelerate());
 
   const body = await c.req.json();
+
+  const {success}=createBlogValidation.safeParse(body)
+  if(!success){
+    c.status(411)
+    return c.json({message:"wrong type "})
+  }
 
   const respons = await prisma.post.update({
     where: {

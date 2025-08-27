@@ -14,7 +14,7 @@ export const singinValidation = z.object({
 
 export const createBlogValidation=z.object({
     content:z.string(),
-    titie:z.string(),
+    title:z.string(),
     publish:z.boolean().optional()
     
 })
